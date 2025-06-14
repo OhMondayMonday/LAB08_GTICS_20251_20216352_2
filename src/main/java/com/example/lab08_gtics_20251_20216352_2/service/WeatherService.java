@@ -1,18 +1,25 @@
 package com.example.lab08_gtics_20251_20216352_2.service;
 
+import com.example.lab08_gtics_20251_20216352_2.entity.MonitoreoClimatico;
+import com.example.lab08_gtics_20251_20216352_2.repository.MonitoreoClimaticoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.util.Map;
+
 import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class WeatherService {
     private static final String API_KEY = "88e12060abad41ab97212738250906";
     private static final String BASE_URL = "https://api.weatherapi.com/v1/current.json";
 
-    public ResponseEntity<HashMap<String, Object>> getCurrentWeather(String city) {
+    @Autowired
+    private MonitoreoClimaticoRepository monitoreoClimaticoRepository;
+
+    public ResponseEntity<HashMap<String, Object>> obtenerClimaActual(String city) {
         HashMap<String, Object> responseJson = new HashMap<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -43,7 +50,7 @@ public class WeatherService {
         }
     }
 
-    public ResponseEntity<HashMap<String, Object>> getHourlyForecast(String city) {
+    public ResponseEntity<HashMap<String, Object>> obtenerPronosticoPorHoras(String city) {
         HashMap<String, Object> responseJson = new HashMap<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -55,9 +62,9 @@ public class WeatherService {
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
             responseJson.put("city", city);
             Map<String, Object> forecast = (Map<String, Object>) response.get("forecast");
-            if (forecast == null) throw new Exception("No se encontró pronóstico");
+            if (forecast == null) throw new Exception("No se encontró forecast");
             java.util.List<Map<String, Object>> forecastday = (java.util.List<Map<String, Object>>) forecast.get("forecastday");
-            if (forecastday == null || forecastday.isEmpty()) throw new Exception("No se encontró pronóstico");
+            if (forecastday == null || forecastday.isEmpty()) throw new Exception("No se encontró forecastday");
             Map<String, Object> today = forecastday.get(0);
             java.util.List<Map<String, Object>> hours = (java.util.List<Map<String, Object>>) today.get("hour");
             java.util.List<HashMap<String, Object>> forecastList = new java.util.ArrayList<>();
@@ -74,9 +81,14 @@ public class WeatherService {
             responseJson.put("forecast", forecastList);
             return ResponseEntity.ok(responseJson);
         } catch (Exception e) {
-            responseJson.put("result", "fallido");
+            responseJson.put("result", "failure");
             responseJson.put("msg", "No se pudo obtener el pronóstico: " + e.getMessage());
             return ResponseEntity.badRequest().body(responseJson);
         }
+    }
+
+    public ResponseEntity<MonitoreoClimatico> saveMonitoreoClimatico(MonitoreoClimatico monitoreo) {
+        MonitoreoClimatico saved = monitoreoClimaticoRepository.save(monitoreo);
+        return ResponseEntity.ok(saved);
     }
 }
