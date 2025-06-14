@@ -20,8 +20,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/weather/**").authenticated()
                         .anyRequest().permitAll()
                 )
-                .httpBasic(withDefaults())
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()));
+                .httpBasic(withDefaults());
+        // Elimina o comenta la siguiente línea si solo quieres Basic Auth
+        // .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()));
         return http.build();
     }
 
