@@ -13,8 +13,13 @@ public class WeatherController {
     @Autowired
     private WeatherService weatherService;
 
-    @GetMapping("/api/weather/current")
+    @GetMapping("/api/weather/actual")
     public ResponseEntity<HashMap<String, Object>> getCurrentWeather(@RequestParam String city) {
         return weatherService.getCurrentWeather(city);
+    }
+
+    @GetMapping("/api/weather/horas")
+    public ResponseEntity<HashMap<String, Object>> getHourlyForecast(@RequestParam String city) {
+        return weatherService.getHourlyForecast(city);
     }
 }
